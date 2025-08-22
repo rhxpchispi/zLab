@@ -1,17 +1,10 @@
 pipeline {
-    agent {
-        docker {
-            image 'maven:3.8.6-openjdk-11'
-            args '-v /root/.m2:/root/.m2'
-        }
-    }
-    
+    agent any
     environment {
         REGISTRY = "localhost:5000"  // Usando registry local de minikube
         IMAGE_NAME = "rhxpchispi/zlab-java-app"
         KUBECONFIG = "/home/jenkins/.kube/config"
-    }
-    
+    }  
     parameters {
         choice(
             choices: ['dev', 'test', 'prod'],
@@ -21,58 +14,70 @@ pipeline {
     }
     
     stages {
-        stage('Clean') {
-            steps {
-                sh 'mvn clean'
+        stage('CI | Maven') {
+            agent {
+                docker {
+                    image 'maven:3.8.6-openjdk-11'
+                    args '-v /root/.m2:/root/.m2'
+                    reuseNode true
+                }
             }
-        }
+
+            stages {
+                stage('Clean') {
+                    steps {
+                        sh 'mvn clean'
+                    }
+                }
         
-        stage('Build') {
-            steps {
-                sh 'mvn compile'
-            }
-        }
-        
-        stage('Test') {
-            steps {
-                script {
-                    // Ejecutar tests pero continuar incluso si fallan (para desarrollo)
-                    try {
-                        sh 'mvn test'
-                    } catch (Exception e) {
-                        echo "Tests fallaron o no hay tests: ${e.message}"
-                        // Continuar el pipeline a pesar de los tests fallidos
+                stage('Build') {
+                    steps {
+                        sh 'mvn compile'
+                    }
+                }
+                
+                stage('Test') {
+                    steps {
+                        script {
+                            // Ejecutar tests pero continuar incluso si fallan (para desarrollo)
+                            try {
+                                sh 'mvn test'
+                            } catch (Exception e) {
+                                echo "Tests fallaron o no hay tests: ${e.message}"
+                                // Continuar el pipeline a pesar de los tests fallidos
+                            }
+                        }
+                    }
+                    post {
+                        always {
+                            // Buscar reportes de tests pero no fallar si no existen
+                            junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
+                        }
+                    }
+                }
+                
+                stage('Package') {
+                    steps {
+                        sh 'mvn package -DskipTests'
                     }
                 }
             }
-            post {
-                always {
-                    // Buscar reportes de tests pero no fallar si no existen
-                    junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
-                }
-            }
-        }
+        }        
         
-        stage('Package') {
-            steps {
-                sh 'mvn package -DskipTests'
-            }
-        }
-        
-        stage('Docker build') {
+        stage('CI | Docker build') {
             steps {
                 sh "docker build -t ${env.IMAGEN}:${params.ENVIRONMENT}-${env.BUILD_ID} ."
             }
         }
         
-        stage('Push de la imagen a Docker Hub') {
+        stage('CD | Push de la imagen a Docker Hub') {
             steps {
                 sh 'echo $DOCKERHUB_CRED_PSW | docker login -u $DOCKERHUB_CRED_USR --password-stdin'
                 sh "docker push ${env.IMAGEN}:${params.ENVIRONMENT}-${env.BUILD_ID}"
             }
         }
         
-        stage('Deploy to Environment') {
+        stage('CD | Deploy a Environment') {
             steps {
                 script {
                     if (params.ENVIRONMENT == 'prod') {
