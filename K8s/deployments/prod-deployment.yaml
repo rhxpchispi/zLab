@@ -73,6 +73,7 @@ spec:
     env: prod
   ports:
     - protocol: TCP
-      port: 9200
+      port: 80
       targetPort: 8080
-  type: ClusterIP
+      nodePort: 30003
+  type: NodePort

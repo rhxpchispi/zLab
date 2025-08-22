@@ -101,9 +101,6 @@ pipeline {
                         # Aplicar configmaps para el ambiente seleccionado
                         kubectl apply -f K8s/configmaps/${params.ENVIRONMENT}-configmap.yaml
                         
-                        # Actualizar la imagen en el deployment
-                        kubectl set image deployment/java-app java-app=${env.IMAGEN}:${params.ENVIRONMENT}-${env.BUILD_ID} -n ${params.ENVIRONMENT}-ns || true
-                        
                         # Aplicar deployment
                         kubectl apply -f K8s/deployments/${params.ENVIRONMENT}-deployment.yaml
                         

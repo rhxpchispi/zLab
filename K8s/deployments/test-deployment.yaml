@@ -73,6 +73,7 @@ spec:
     env: test
   ports:
     - protocol: TCP
-      port: 9300
+      port: 80
       targetPort: 8080
-  type: ClusterIP
+      nodePort: 30002
+  type: NodePort
