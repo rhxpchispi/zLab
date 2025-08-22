@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: java-app
-        image: k8s-lab/java-app:latest
+        image: rhxpchispi/zlab-java-app:test-latest
         ports:
         - containerPort: 8080
         env:

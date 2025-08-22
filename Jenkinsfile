@@ -71,8 +71,17 @@ pipeline {
         
         stage('CD | Push de la imagen a Docker Hub') {
             steps {
-                sh 'echo $DOCKERHUB_CRED_PSW | docker login -u $DOCKERHUB_CRED_USR --password-stdin'
-                sh "docker push ${env.IMAGEN}:${params.ENVIRONMENT}-${env.BUILD_ID}"
+                script {
+                    def imageTag = "${env.IMAGEN}:${params.ENVIRONMENT}-${env.BUILD_ID}"
+                    def latestTag = "${env.IMAGEN}:${params.ENVIRONMENT}-latest"
+                    sh """
+                        echo $DOCKERHUB_CRED_PSW | docker login -u $DOCKERHUB_CRED_USR --password-stdin
+
+                        docker push $imageTag || true
+                        docker tag $imageTag $latestTag || true
+                        docker push $latestTag || true
+                    """
+                }
             }
         }
         
