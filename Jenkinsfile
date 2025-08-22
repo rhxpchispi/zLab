@@ -110,16 +110,25 @@ pipeline {
                 }
             }
         }
-    }
-    
-    post {
-        success {
-            echo 'Pipeline ejecutado correctamente'
-            slackSend color: 'good', message: "Build ${env.BUILD_ID} desplegado en ${params.ENVIRONMENT} - EXITOSO"
-        }
-        failure {
-            echo 'Pipeline falló'
-            slackSend color: 'danger', message: "Build ${env.BUILD_ID} falló en ${params.ENVIRONMENT}"
+
+        stage('Cleanup Jenkins workdir') {
+            steps{
+                script{
+                    def workspaceDir = new File(env.WORKSPACE)
+                    def tmpDir = new File("${env.WORKSPACE}@tmp")
+
+                    if (workspaceDir.exists()) {
+                        workspaceDir.deleteDir()
+                        echo "Cleanup: se eliminó ${env.WORKSPACE}"
+                    }
+
+                    if (tmpDir.exists()) {
+                        tmpDir.deleteDir()
+                        echo "Cleanup: se eliminó ${env.WORKSPACE}@tmp"
+                    }
+                    echo "borrado completo"
+                }
+            }
         }
     }
 }
