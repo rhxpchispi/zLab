@@ -1,9 +1,7 @@
 pipeline {
     agent any
     environment {
-        REGISTRY = "localhost:5000"  // Usando registry local de minikube
         IMAGEN = "rhxpchispi/zlab-java-app"
-        KUBECONFIG = "/var/jenkins_home/.kube/config"
         DOCKERHUB_CRED = credentials ('dockerhub')
     }  
     parameters {
@@ -95,7 +93,7 @@ pipeline {
                         kubectl apply -f K8s/configmaps/${params.ENVIRONMENT}-configmap.yaml
                         
                         # Actualizar la imagen en el deployment
-                        kubectl set image deployment/java-app java-app=${REGISTRY}/${env.IMAGEN}:${params.ENVIRONMENT}-${env.BUILD_ID} -n ${params.ENVIRONMENT}-ns || true
+                        kubectl set image deployment/java-app java-app=${env.IMAGEN}:${params.ENVIRONMENT}-${env.BUILD_ID} -n ${params.ENVIRONMENT}-ns || true
                         
                         # Aplicar deployment
                         kubectl apply -f K8s/deployments/${params.ENVIRONMENT}-deployment.yaml
