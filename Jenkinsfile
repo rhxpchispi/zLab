@@ -2,8 +2,8 @@ pipeline {
     agent any
     environment {
         REGISTRY = "localhost:5000"  // Usando registry local de minikube
-        IMAGE_NAME = "rhxpchispi/zlab-java-app"
-        KUBECONFIG = "/home/jenkins/.kube/config"
+        IMAGEN = "rhxpchispi/zlab-java-app"
+        KUBECONFIG = "/var/jenkins_home/.kube/config"
     }  
     parameters {
         choice(
