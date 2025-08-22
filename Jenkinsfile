@@ -4,6 +4,7 @@ pipeline {
         REGISTRY = "localhost:5000"  // Usando registry local de minikube
         IMAGEN = "rhxpchispi/zlab-java-app"
         KUBECONFIG = "/var/jenkins_home/.kube/config"
+        DOCKERHUB_CRED = credentials ('dockerhub')
     }  
     parameters {
         choice(
