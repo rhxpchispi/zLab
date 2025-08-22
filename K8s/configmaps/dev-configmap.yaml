@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: dev-ns
+data:
+  APP_ENV: "development"
+  WELCOME_MESSAGE: "Bienvenido al Ambiente de Desarrollo"
+  VERSION: "1.0.0-dev"
+  API_URL: "http://dev-api.example.com"
+  APP_COLOR: "lightgreen"
