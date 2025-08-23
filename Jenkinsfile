@@ -85,7 +85,7 @@ pipeline {
             }
         }
         
-        stage('CD | Deploy a Environment') {
+        /*stage('CD | Deploy a Environment') {
             steps {
                 script {
                     if (params.ENVIRONMENT == 'prod') {
@@ -109,7 +109,7 @@ pipeline {
                     """
                 }
             }
-        }
+        }*/
 
         stage('Cleanup Jenkins workdir') {
             steps{
